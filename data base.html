@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Sales Properti</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { color: #333; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px; }
+        button { background-color: #28a745; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 4px; }
+        button:hover { background-color: #218838; }
+        
+        /* Bagian Database (Admin Only) */
+        #admin-section { margin-top: 30px; display: none; } /* Tersembunyi secara default */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #007bff; color: white; }
+        .status-deadline { color: #d9534f; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🏠 Input Data Booking Properti</h2>
+    <p>Silahkan masukkan data calon pembeli di bawah ini.</p>
+    
+    <div class="form-group">
+        <label>Nama Pembeli:</label>
+        <input type="text" id="nama" placeholder="Contoh: Budi Santoso">
+    </div>
+    <div class="form-group">
+        <label>Harga (Rp):</label>
+        <input type="number" id="harga" placeholder="Contoh: 500000000">
+    </div>
+    <div class="form-group">
+        <label>Luas Tanah (m²):</label>
+        <input type="number" id="luas" placeholder="Contoh: 120">
+    </div>
+    <button onclick="simpanData()">Booking Sekarang</button>
+
+    <hr style="margin: 30px 0;">
+
+    <div id="login-admin">
+        <h3>🔐 Area Admin</h3>
+        <p>Masukkan password "admin123" untuk melihat database.</p>
+        <input type="password" id="passInput" style="width: 200px;">
+        <button onclick="cekAdmin()" style="background-color: #007bff;">Lihat Data</button>
+    </div>
+
+    <div id="admin-section">
+        <h3>📊 Database Penjualan</h3>
+        <table id="tabelData">
+            <thead>
+                <tr>
+                    <th>Nama</th>
+                    <th>Harga</th>
+                    <th>Luas</th>
+                    <th>Tgl Input</th>
+                    <th>Tenggat (2 Minggu)</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+        <br>
+        <button onclick="logout()" style="background-color: #6c757d;">Logout Admin</button>
+    </div>
+</div>
+
+<script>
+    // Database sementara di memori browser
+    let database = [];
+
+    function simpanData() {
+        const nama = document.getElementById('nama').value;
+        const harga = document.getElementById('harga').value;
+        const luas = document.getElementById('luas').value;
+        
+        if(!nama || !harga || !luas) {
+            alert("Tolong isi semua data!");
+            return;
+        }
+
+        // Ambil Tanggal Sekarang
+        const tglMasuk = new Date();
+        
+        // Hitung Tenggat (14 Hari ke depan)
+        const tglTenggat = new Date();
+        tglTenggat.setDate(tglMasuk.getDate() + 14);
+
+        const dataBaru = {
+            nama: nama,
+            harga: "Rp " + parseInt(harga).toLocaleString(),
+            luas: luas + " m²",
+            masuk: tglMasuk.toLocaleDateString('id-ID'),
+            deadline: tglTenggat.toLocaleDateString('id-ID')
+        };
+
+        database.push(dataBaru);
+        alert("Data berhasil dibooking!");
+        
+        // Reset Form
+        document.getElementById('nama').value = "";
+        document.getElementById('harga').value = "";
+        document.getElementById('luas').value = "";
+        
+        updateTabel();
+    }
+
+    function cekAdmin() {
+        const pass = document.getElementById('passInput').value;
+        if(pass === "admin123") {
+            document.getElementById('admin-section').style.display = "block";
+            document.getElementById('login-admin').style.display = "none";
+        } else {
+            alert("Password Salah!");
+        }
+    }
+
+    function logout() {
+        document.getElementById('admin-section').style.display = "none";
+        document.getElementById('login-admin').style.display = "block";
+        document.getElementById('passInput').value = "";
+    }
+
+    function updateTabel() {
+        const tbody = document.querySelector("#tabelData tbody");
+        tbody.innerHTML = ""; // Bersihkan tabel dulu
+
+        database.forEach(item => {
+            let row = `<tr>
+                <td>${item.nama}</td>
+                <td>${item.harga}</td>
+                <td>${item.luas}</td>
+                <td>${item.masuk}</td>
+                <td class="status-deadline">${item.deadline}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+        });
+    }
+</script>
+
+</body>
+</html>
